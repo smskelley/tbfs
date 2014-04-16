@@ -5,13 +5,15 @@ import fuse
 import stat  
 import time  
 import os,sys,glob
+import fsmodel
 
 open_files={}
 
 fuse.fuse_python_api = (0, 2)  
   
 class MyFS(fuse.Fuse):  
-
+    
+    model = fsmodel.FSModel()
     def __init__(self, *args, **kw):  
 	for x in sys.argv:
 		print "***"+x
