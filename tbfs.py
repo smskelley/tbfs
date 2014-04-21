@@ -10,125 +10,121 @@ import fsmodel
 open_files={}
 
 fuse.fuse_python_api = (0, 2)  
-  
+
 class MyFS(fuse.Fuse):  
-    
+
     model = fsmodel.FSModel()
     def __init__(self, *args, **kw):  
-	for x in sys.argv:
-		print "***"+x
-	print ":::::"+sys.argv[-2]
+        for x in sys.argv:
+            print "***"+x
+        print ":::::"+sys.argv[-2]
         fuse.Fuse.__init__(self, *args, **kw)  
 
     def getattr(self, path):  
 
-	print "getattr-path: ",path
+        print "getattr-path: ",path
         return os.stat(sys.argv[-2]+path)
 
     def readdir(self,path,offset):
-	print "*** READDIR: ",path
+        print "*** READDIR: ",path
 
-	yield fuse.Direntry('.')
-	yield fuse.Direntry('..')
-	print ":::::"+sys.argv[-2]
-	for x in os.listdir(sys.argv[-2]+path):
-		yield fuse.Direntry(os.path.basename(x))
+        yield fuse.Direntry('.')
+        yield fuse.Direntry('..')
+        print ":::::"+sys.argv[-2]
+        for x in os.listdir(sys.argv[-2]+path):
+            yield fuse.Direntry(os.path.basename(x))
 
-#	yield fuse.Direntry('test')
-
-	return
-	
-	
+        return
 
     def open(self,path,flags):
 
-	print "********* OPEN: ",path
+        print "********* OPEN: ",path
 
-	access_flags = os.O_RDONLY | os.O_WRONLY | os.O_RDWR
-	access_flags = flags & access_flags
+        access_flags = os.O_RDONLY | os.O_WRONLY | os.O_RDWR
+        access_flags = flags & access_flags
 
-	if access_flags == os.O_RDONLY:
-		fi=open(sys.argv[-2]+path,"r")
-		open_files[path]=fi
-		return 0
+        if access_flags == os.O_RDONLY:
+            fi=open(sys.argv[-2]+path,"r")
+            open_files[path]=fi
+            return 0
 
-	else: 			#access_flags == os.O_WRONLY:
+        else: 			#access_flags == os.O_WRONLY:
 
-		fi=open(sys.argv[-2]+path,"w")
-		open_files[path]=fi
-		return 0
+            fi=open(sys.argv[-2]+path,"w")
+            open_files[path]=fi
+            return 0
 
 
-	return -errno.EACCESS
+        return -errno.EACCESS
 
     def create(self, path, flags, mode):
 
-	print "****CREATE: ",path
-	fi=open(sys.argv[-2]+path,"w")
+        print "****CREATE: ",path
+        fi=open(sys.argv[-2]+path,"w")
         open_files[path]=fi
         return 0
 
     def chmod(self, path, mode):
-	print "*****CHMOD: ",path
+        print "*****CHMOD: ",path
 
-	return 0
+        return 0
 
     def read(self,path,size,offset):
 
-	print "****READ********: ",path,size,offset
+        print "****READ********: ",path,size,offset
 
-	fi=open_files[path]
-	fi.seek(offset)
+        fi=open_files[path]
+        fi.seek(offset)
 
-	return fi.read(size)
+        return fi.read(size)
 
 
     def write(self,path, buf, offset, fh=None):
 
-	print "***WRITE: ",path,offset	
+        print "***WRITE: ",path,offset	
 
-	fo=open_files[path]
-	fo.seek(offset)
-	fo.write(buf)
-	return len(buf)
+        fo=open_files[path]
+        fo.seek(offset)
+        fo.write(buf)
+        return len(buf)
 
     def flush(self, path, fh=None):
 
-	print "***FLUSH: ",path
+        print "***FLUSH: ",path
 
-	if path in open_files:
-		fh=open_files[path]
-		fh.flush()
+        if path in open_files:
+            fh=open_files[path]
+            fh.flush()
 
-	return 0
+        return 0
 
     def release(self, path, fh=None):
 
-	print "***RELEASE: ",path
+        print "***RELEASE: ",path
 
-	if path in open_files:
-		fh=open_files[path]
-		fh.close()
-		del open_files[path]
+        if path in open_files:
+            fh=open_files[path]
+            fh.close()
+            del open_files[path]
 
-	return 0
+        return 0
 
     def unlink(self, path):
-	
-	print "***UNLINK: ",path
 
-	if path in open_files:
-		return -errno.ENOSYS
+        print "***UNLINK: ",path
 
-	os.unlink(sys.argv[-2]+path)
-	return 0
-	
+        if path in open_files:
+            return -errno.ENOSYS
+
+        os.unlink(sys.argv[-2]+path)
+        return 0
+
     def rename(self, oldpath, newpath):
 
-	os.rename(sys.argv[-2]+oldpath,sys.argv[-2]+newpath)
-	return 0
-	
-  
+        os.rename(sys.argv[-2]+oldpath,sys.argv[-2]+newpath)
+        return 0
+
+
 if __name__ == '__main__':  
     fs = MyFS()  
     fs.parse(errex=1)  
