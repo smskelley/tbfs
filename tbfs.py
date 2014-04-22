@@ -20,8 +20,16 @@ class MyFS(fuse.Fuse):
     def __init__(self, *args, **kw):  
         for x in sys.argv:
             print "***"+x
-        print ":::::"+sys.argv[-2]
-        fuse.Fuse.__init__(self, *args, **kw)  
+        self.actual_path = os.path.abspath(sys.argv[-2])
+        print ":::::"+self.actual_path
+
+        fuse.Fuse.__init__(self, *args, **kw)
+
+    def actual_file_path(self, actual_file):
+        ''' Given an actual file (junk.txt), returns an absolute path to the
+        actual file or path.
+        '''
+        return os.path.join(self.actual_path, actual_file)
 
     def getattr(self, path):  
 
