@@ -123,8 +123,7 @@ class MyFS(fuse.Fuse):
 
                 file_hash = hasher.hexdigest()
 
-
-                if file_hash in hash_dict:
+                if file_hash in hash_dict.values():
                     os.remove(old_file_name)
                 else: 
                     os.rename(old_file_name, sys.argv[-2]+"/"+file_hash)
