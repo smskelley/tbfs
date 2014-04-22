@@ -6,7 +6,6 @@ import stat
 import time  
 import os,sys,glob
 import hashlib
-import fsmodel
 
 ''' open_files is a dictionary for keeping track of which files are currently
 open. The key indicates the *mounted* path, while the value is the file object.
@@ -18,7 +17,6 @@ fuse.fuse_python_api = (0, 2)
 
 class MyFS(fuse.Fuse):  
 
-    model = fsmodel.FSModel()
     def __init__(self, *args, **kw):  
         for x in sys.argv:
             print "***"+x
