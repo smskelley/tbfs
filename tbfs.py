@@ -6,6 +6,7 @@ import stat
 import time  
 import os,sys,glob
 import hashlib
+import pickle
 
 ''' open_files is a dictionary for keeping track of which files are currently
 open. The key indicates the *mounted* path, while the value is the file object.
@@ -15,15 +16,30 @@ hash_dict = {}
 
 fuse.fuse_python_api = (0, 2)  
 
-class MyFS(fuse.Fuse):  
-
+class MyFS(fuse.Fuse):
+    hash_pickle_file = ".hashdict.pickle"
+    
     def __init__(self, *args, **kw):  
         for x in sys.argv:
             print "***"+x
         self.actual_path = os.path.abspath(sys.argv[-2])
         print ":::::"+self.actual_path
+        if self.load_data():
+            print "Successfully loaded {0}".format(self.hash_pickle_file)
 
         fuse.Fuse.__init__(self, *args, **kw)
+
+    def load_data(self):
+        if os.path.isfile(self.actual_file_path(self.hash_pickle_file)):
+            with open(self.actual_file_path(self.hash_pickle_file), 'r') as fh:
+                hash_dict = pickle.load(fh)
+            return True
+        return False
+    
+    def save_data(self):
+        with open(self.actual_file_path(self.hash_pickle_file), 'w') as fh:
+            pickle.dump(hash_dict, fh)
+            fh.flush()
 
     def actual_file_path(self, actual_file):
         ''' Given an actual file (junk.txt), returns an absolute path to the
@@ -141,6 +157,7 @@ class MyFS(fuse.Fuse):
 
                 hash_dict[path] = file_hash
                 print "***RELEASE: [{0}] -> [{1}]".format(path, file_hash)
+                self.save_data()
         else:
             print "***RELEASE: no record of {0} being open.".format(path)
 
