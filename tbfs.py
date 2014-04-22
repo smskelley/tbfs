@@ -5,9 +5,14 @@ import fuse
 import stat  
 import time  
 import os,sys,glob
+import hashlib
 import fsmodel
 
+''' open_files is a dictionary for keeping track of which files are currently
+open. The key indicates the *mounted* path, while the value is the file object.
+'''
 open_files={}
+hash_dict = {}
 
 fuse.fuse_python_api = (0, 2)  
 
@@ -99,13 +104,35 @@ class MyFS(fuse.Fuse):
         return 0
 
     def release(self, path, fh=None):
-
+        ''' Close a particular file. Before closing, we will find its hash
+        and if there's a file with that hash already, then we will discard
+        this file. Otherwise, we will rename it to its hash value and store
+        it in the hash_dict.
+        '''
         print "***RELEASE: ",path
 
         if path in open_files:
-            fh=open_files[path]
-            fh.close()
+            old_file_name = open_files[path].name
+            open_files[path].close()
             del open_files[path]
+
+            with open(old_file_name, "r") as fh:
+                hasher = hashlib.md5()
+                for line in fh:
+                    hasher.update(line)
+
+                file_hash = hasher.hexdigest()
+
+
+                if file_hash in hash_dict:
+                    os.remove(old_file_name)
+                else: 
+                    os.rename(old_file_name, sys.argv[-2]+"/"+file_hash)
+
+                hash_dict[path] = hash_dict
+                print "***RELEASE: [{0}] -> [{1}]".format(path, file_hash)
+        else:
+            print "***RELEASE: no record of {0} being open.".format(path)
 
         return 0
 
