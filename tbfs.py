@@ -139,7 +139,7 @@ class MyFS(fuse.Fuse):
                 else: 
                     os.rename(old_file_name, sys.argv[-2]+"/"+file_hash)
 
-                hash_dict[path] = hash_dict
+                hash_dict[path] = file_hash
                 print "***RELEASE: [{0}] -> [{1}]".format(path, file_hash)
         else:
             print "***RELEASE: no record of {0} being open.".format(path)
