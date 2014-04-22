@@ -113,8 +113,13 @@ class MyFS(fuse.Fuse):
 
         if path in open_files:
             old_file_name = open_files[path].name
+            previous_mode = open_files[path].mode
             open_files[path].close()
             del open_files[path]
+
+            # if the file was only opened for reading, then we're done.
+            if 'w' not in previous_mode and 'a' not in previous_mode:
+                return 0
 
             with open(old_file_name, "r") as fh:
                 hasher = hashlib.md5()
