@@ -51,7 +51,7 @@ class MyFS(fuse.Fuse):
     def getattr(self, path):  
 
         print "getattr-path: ",path
-        return os.stat(sys.argv[-2]+path)
+        return os.stat(self.actual_file_path(hash_dict.get(path,path)))
 
     def readdir(self,path,offset):
         print "*** READDIR: ",path
