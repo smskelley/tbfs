@@ -93,6 +93,13 @@ class MyFS(fuse.Fuse):
 
         return -errno.EACCESS
 
+
+    def truncate(self, path, size):
+        print "****TRUNCATE: {0}, size: {1}".format(path, size)
+        with open(self.actual_file_path(self.hash_dict[path]), "w") as fh:
+            os.ftruncate(fh.fileno(), size)
+        return 0
+
     def create(self, path, flags, mode):
 		
         print "****CREATE: ",path
