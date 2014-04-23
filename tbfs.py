@@ -19,6 +19,7 @@ fuse.fuse_python_api = (0, 2)
 
 class MyFS(fuse.Fuse):
     hash_pickle_file = ".hashdict.pickle"
+    hash_dict = {}
     
     def __init__(self, *args, **kw):  
         for x in sys.argv:
