@@ -60,8 +60,8 @@ class MyFS(fuse.Fuse):
         yield fuse.Direntry('.')
         yield fuse.Direntry('..')
         print ":::::"+sys.argv[-2]
-        for x in os.listdir(sys.argv[-2]+path):
-            yield fuse.Direntry(os.path.basename(x))
+        for key in hash_dict:
+            yield fuse.Direntry(os.path.basename(key))
 
         return
 
