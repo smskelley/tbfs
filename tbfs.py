@@ -14,7 +14,6 @@ import random
 open. The key indicates the *mounted* path, while the value is the file object.
 '''
 open_files={}
-hash_dict = {}
 
 fuse.fuse_python_api = (0, 2)  
 
@@ -34,14 +33,15 @@ class MyFS(fuse.Fuse):
     def load_data(self):
         if os.path.isfile(self.actual_file_path(self.hash_pickle_file)):
             with open(self.actual_file_path(self.hash_pickle_file), 'r') as fh:
-                hash_dict = pickle.load(fh)
+                self.hash_dict = pickle.load(fh)
             return True
         return False
     
     def save_data(self):
         with open(self.actual_file_path(self.hash_pickle_file), 'w') as fh:
-            pickle.dump(hash_dict, fh)
+            pickle.dump(self.hash_dict, fh)
             fh.flush()
+            print "SAVE_DATA: saved to {0}".format(fh.name)
 
     def actual_file_path(self, actual_file):
         ''' Given an actual file (junk.txt), returns an absolute path to the
@@ -52,7 +52,7 @@ class MyFS(fuse.Fuse):
     def getattr(self, path):  
 
         print "getattr-path: ",path
-        return os.stat(self.actual_file_path(hash_dict.get(path,path)))
+        return os.stat(self.actual_file_path(self.hash_dict.get(path,path)))
 
     def readdir(self,path,offset):
         print "*** READDIR: ",path
@@ -60,7 +60,7 @@ class MyFS(fuse.Fuse):
         yield fuse.Direntry('.')
         yield fuse.Direntry('..')
         print ":::::"+sys.argv[-2]
-        for key in hash_dict:
+        for key in self.hash_dict:
             yield fuse.Direntry(os.path.basename(key))
 
         return
@@ -74,7 +74,7 @@ class MyFS(fuse.Fuse):
 
         if access_flags == os.O_RDONLY:
 			
-            hash_path = hash_dict[path]
+            hash_path = self.hash_dict[path]
             fi=open(sys.argv[-2]+hash_path,"r")
             open_files[path]=fi
             return 0
@@ -82,11 +82,11 @@ class MyFS(fuse.Fuse):
         else: 			#access_flags == os.O_WRONLY:
 
             randomnum = str(random.randint(0, sys.maxint))
-            hash_path = hash_dict[path] + randomnum
-            shutil.copyfile(self.actual_file_path(hash_dict[path]), 
+            hash_path = self.hash_dict[path] + randomnum
+            shutil.copyfile(self.actual_file_path(self.hash_dict[path]), 
                             self.actual_file_path(hash_path))
             fi=open(self.actual_file_path(hash_path),"w")
-            hash_dict[path] = hash_path
+            self.hash_dict[path] = hash_path
             open_files[path]=fi
             return 0
 
@@ -98,7 +98,7 @@ class MyFS(fuse.Fuse):
         print "****CREATE: ",path
         hash_path = "0_" + str(random.randint(0,sys.maxint))
         fi=open(self.actual_file_path(hash_path),"w")
-        hash_dict[path] = hash_path
+        self.hash_dict[path] = hash_path
         open_files[path]=fi
         return 0
 
@@ -161,12 +161,12 @@ class MyFS(fuse.Fuse):
 
                 file_hash = hasher.hexdigest()
 
-                if file_hash in hash_dict.values():
+                if file_hash in self.hash_dict.values():
                     os.remove(old_file_name)
                 else: 
                     os.rename(old_file_name, sys.argv[-2]+"/"+file_hash)
 
-                hash_dict[path] = file_hash
+                self.hash_dict[path] = file_hash
                 print "***RELEASE: [{0}] -> [{1}]".format(path, file_hash)
                 self.save_data()
         else:
