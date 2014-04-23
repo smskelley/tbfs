@@ -7,6 +7,7 @@ import time
 import os,sys,glob
 import hashlib
 import pickle
+import shutil
 
 ''' open_files is a dictionary for keeping track of which files are currently
 open. The key indicates the *mounted* path, while the value is the file object.
@@ -71,13 +72,18 @@ class MyFS(fuse.Fuse):
         access_flags = flags & access_flags
 
         if access_flags == os.O_RDONLY:
-            fi=open(sys.argv[-2]+path,"r")
+			
+			hash_path = hash_dict[path]
+            fi=self.open(sys.argv[-2]+hash_path,"r")
             open_files[path]=fi
             return 0
 
         else: 			#access_flags == os.O_WRONLY:
-
-            fi=open(sys.argv[-2]+path,"w")
+			
+			hash_path = hash_dict[path]
+			random = str(random.randint(0, sys.maxint))
+			shutil.copyfile(sys.argv[-2]+hash_path, sys.argv[-2]+hash_path+random))
+			fi=self.open(sys.argv[-2]+path+random,"w")
             open_files[path]=fi
             return 0
 
@@ -85,9 +91,10 @@ class MyFS(fuse.Fuse):
         return -errno.EACCESS
 
     def create(self, path, flags, mode):
-
+		
         print "****CREATE: ",path
-        fi=open(sys.argv[-2]+path,"w")
+        hash_path = "0_" + str(random.randint(0,sys.maxint))
+		fi=self.open(sys.argv[-2]+hash_path,"w")
         open_files[path]=fi
         return 0
 
