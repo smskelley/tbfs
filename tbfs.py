@@ -32,6 +32,7 @@ class MyFS(fuse.Fuse):
         fuse.Fuse.__init__(self, *args, **kw)
 
     def load_data(self):
+        ''' Loads data from the hash_pickle_file located in the actual dir. '''
         if os.path.isfile(self.actual_file_path(self.hash_pickle_file)):
             with open(self.actual_file_path(self.hash_pickle_file), 'r') as fh:
                 self.hash_dict = pickle.load(fh)
@@ -39,6 +40,7 @@ class MyFS(fuse.Fuse):
         return False
     
     def save_data(self):
+        ''' Saves data to the hash_pickle_file located in the actual dir. '''
         with open(self.actual_file_path(self.hash_pickle_file), 'w') as fh:
             pickle.dump(self.hash_dict, fh)
             fh.flush()
@@ -51,11 +53,13 @@ class MyFS(fuse.Fuse):
         return os.path.join(self.actual_path, actual_file)
 
     def getattr(self, path):  
-
         print "getattr-path: ",path
         return os.stat(self.actual_file_path(self.hash_dict.get(path,path)))
 
     def readdir(self,path,offset):
+        ''' Shows directory listing. Note that currently directories aren't
+        implemented, so this simply lists all files.
+        '''
         print "*** READDIR: ",path
 
         yield fuse.Direntry('.')
@@ -94,8 +98,10 @@ class MyFS(fuse.Fuse):
 
         return -errno.EACCESS
 
-
     def truncate(self, path, size):
+        ''' Allows a file's size to be truncated. This is called when writing
+        to an already existing file. (At least in linux)
+        '''
         print "****TRUNCATE: {0}, size: {1}".format(path, size)
         with open(self.actual_file_path(self.hash_dict[path]), "w") as fh:
             os.ftruncate(fh.fileno(), size)
@@ -123,7 +129,6 @@ class MyFS(fuse.Fuse):
         fi.seek(offset)
 
         return fi.read(size)
-
 
     def write(self,path, buf, offset, fh=None):
 
