@@ -118,11 +118,14 @@ class MyFS(fuse.Fuse):
 
     def chmod(self, path, mode):
         print "*****CHMOD: ",path
+        if path in self.hash_dict:
+            os.chmod(self.actual_file_path(self.hash_dict[path]), mode)
+        else:
+            return -errno.ENOENT
 
         return 0
 
     def read(self,path,size,offset):
-
         print "****READ********: ",path,size,offset
 
         fi=open_files[path]
