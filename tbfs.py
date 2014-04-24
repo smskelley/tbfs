@@ -71,21 +71,18 @@ class MyFS(fuse.Fuse):
         return
 
     def open(self,path,flags):
-
         print "********* OPEN: ",path
 
         access_flags = os.O_RDONLY | os.O_WRONLY | os.O_RDWR
         access_flags = flags & access_flags
 
         if access_flags == os.O_RDONLY:
-			
             hash_path = self.hash_dict[path]
             fi=open(sys.argv[-2]+hash_path,"r")
             open_files[path]=fi
             return 0
 
         else: 			#access_flags == os.O_WRONLY:
-
             randomnum = str(random.randint(0, sys.maxint))
             hash_path = self.hash_dict[path] + randomnum
             shutil.copyfile(self.actual_file_path(self.hash_dict[path]), 
@@ -108,7 +105,6 @@ class MyFS(fuse.Fuse):
         return 0
 
     def create(self, path, flags, mode):
-		
         print "****CREATE: ",path
         hash_path = "0_" + str(random.randint(0,sys.maxint))
         fi=open(self.actual_file_path(hash_path),"w")
@@ -134,7 +130,6 @@ class MyFS(fuse.Fuse):
         return fi.read(size)
 
     def write(self,path, buf, offset, fh=None):
-
         print "***WRITE: ",path,offset	
 
         fo=open_files[path]
@@ -143,7 +138,6 @@ class MyFS(fuse.Fuse):
         return len(buf)
 
     def flush(self, path, fh=None):
-
         print "***FLUSH: ",path
 
         if path in open_files:
@@ -191,7 +185,6 @@ class MyFS(fuse.Fuse):
         return 0
 
     def unlink(self, path):
-
         print "***UNLINK: ",path
 
         if path in open_files:
@@ -201,7 +194,6 @@ class MyFS(fuse.Fuse):
         return 0
 
     def rename(self, oldpath, newpath):
-
         os.rename(sys.argv[-2]+oldpath,sys.argv[-2]+newpath)
         return 0
 
