@@ -25,7 +25,9 @@ class MyFS(fuse.Fuse):
         for x in sys.argv:
             print "***"+x
         self.actual_path = os.path.abspath(sys.argv[-2])
+        sys.argv[-1] = os.path.abspath(sys.argv[-1])
         print ":::::"+self.actual_path
+        print ":::::"+sys.argv[-1]
         if self.load_data():
             print "Successfully loaded {0}".format(self.hash_pickle_file)
 
