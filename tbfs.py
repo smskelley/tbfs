@@ -50,6 +50,8 @@ class MyFS(fuse.Fuse):
         ''' Given an actual file (junk.txt), returns an absolute path to the
         actual file or path.
         '''
+        #remove leading / if it exists, note that this isn't very portable.
+        actual_file = actual_file.strip("/")
         return os.path.join(self.actual_path, actual_file)
 
     def getattr(self, path):  
