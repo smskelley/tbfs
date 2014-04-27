@@ -78,7 +78,7 @@ class MyFS(fuse.Fuse):
 
         if access_flags == os.O_RDONLY:
             hash_path = self.hash_dict[path]
-            fi=open(sys.argv[-2]+hash_path,"r")
+            fi=open(self.actual_file_path(hash_path),"r")
             open_files[path]=fi
             return 0
 
