@@ -132,7 +132,8 @@ class MyFS(fuse.Fuse):
     def rmdir(self, path):
         print "*****RMDIR: ",path
         if path in self.hash_dict:
-            return os.rmdir(full_path)
+            del self.hash_dict[path]
+            return os.rmdir(self.actual_file_path(path))
 
         return -errno.EEXIST    # if the path does not exist
         
