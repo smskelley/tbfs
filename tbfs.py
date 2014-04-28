@@ -68,10 +68,15 @@ class MyFS(fuse.Fuse):
         '''
         print "*** READDIR: ",path
 
+        if path not in self.hash_dict and path != '/':
+            return
+        
         yield fuse.Direntry('.')
         yield fuse.Direntry('..')
         for key in self.hash_dict:
-            yield fuse.Direntry(os.path.basename(key))
+            print "{0} =? {1}".format(path, os.path.dirname(key))
+            if path == os.path.dirname(key):
+                yield fuse.Direntry(os.path.basename(key))
 
         return
 
