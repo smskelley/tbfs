@@ -130,6 +130,7 @@ class MyFS(fuse.Fuse):
         return -errno.EEXIST    # if the path is already in path
 
     def rmdir(self, path):
+        print "*****RMDIR: ",path
         if path in self.hash_dict:
             return os.rmdir(full_path)
 
