@@ -167,30 +167,36 @@ class MyFS(fuse.Fuse):
         print "***RELEASE: ",path
 
         if path in open_files:
-            old_file_name = open_files[path].name
+            old_file_name = self.hash_dict[path]
+            open_file_name = os.path.basename(open_files[path].name)
             previous_mode = open_files[path].mode
+
             open_files[path].close()
             del open_files[path]
 
-            # if the file was only opened for reading, then we're done.
             if 'w' not in previous_mode and 'a' not in previous_mode:
                 return 0
+            
+            file_hash = self.file_hash(self.actual_file_path(open_file_name))
+            self.hash_dict[path] = ""
 
-            with open(old_file_name, "r") as fh:
-                hasher = hashlib.md5()
-                for line in fh:
-                    hasher.update(line)
+            # if the new file has the same hash as another file, discard it
+            if file_hash in self.hash_dict.values():
+                os.remove(self.actual_file_path(open_file_name))
+            # the new file has a new, unique hash, save it as a new hash file
+            else: 
+                os.rename(self.actual_file_path(open_file_name),
+                          self.actual_file_path(file_hash))
 
-                file_hash = hasher.hexdigest()
+            # if the file has changed and the old file is no longer needed
+            if (file_hash != old_file_name and 
+                    old_file_name not in self.hash_dict.values() and
+                    os.path.isfile(self.actual_file_path(old_file_name))):
+                os.remove(self.actual_file_path(old_file_name))
 
-                if file_hash in self.hash_dict.values():
-                    os.remove(old_file_name)
-                else: 
-                    os.rename(old_file_name, sys.argv[-2]+"/"+file_hash)
-
-                self.hash_dict[path] = file_hash
-                print "***RELEASE: [{0}] -> [{1}]".format(path, file_hash)
-                self.save_data()
+            self.hash_dict[path] = file_hash
+            print "***RELEASE: [{0}] -> [{1}]".format(path, file_hash)
+            self.save_data()
         else:
             print "***RELEASE: no record of {0} being open.".format(path)
 
