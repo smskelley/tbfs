@@ -151,6 +151,13 @@ class MyFS(fuse.Fuse):
 
         return 0
 
+    def file_hash(self, path):
+        with open(path, "r") as fh:
+            hasher = hashlib.md5()
+            for line in fh:
+                hasher.update(line)
+            return hasher.hexdigest()
+
     def release(self, path, fh=None):
         ''' Close a particular file. Before closing, we will find its hash
         and if there's a file with that hash already, then we will discard
