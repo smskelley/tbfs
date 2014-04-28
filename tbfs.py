@@ -90,11 +90,10 @@ class MyFS(fuse.Fuse):
 
         else: 			#access_flags == os.O_WRONLY:
             randomnum = str(random.randint(0, sys.maxint))
-            hash_path = self.hash_dict[path] + randomnum
+            hash_path = self.hash_dict[path] + '_' + randomnum
             shutil.copyfile(self.actual_file_path(self.hash_dict[path]), 
                             self.actual_file_path(hash_path))
             fi=open(self.actual_file_path(hash_path),"w")
-            self.hash_dict[path] = hash_path
             open_files[path]=fi
             return 0
 
