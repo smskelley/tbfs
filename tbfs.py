@@ -25,7 +25,9 @@ class MyFS(fuse.Fuse):
         for x in sys.argv:
             print "***"+x
         self.actual_path = os.path.abspath(sys.argv[-2])
+        sys.argv[-1] = os.path.abspath(sys.argv[-1])
         print ":::::"+self.actual_path
+        print ":::::"+sys.argv[-1]
         if self.load_data():
             print "Successfully loaded {0}".format(self.hash_pickle_file)
 
@@ -50,6 +52,8 @@ class MyFS(fuse.Fuse):
         ''' Given an actual file (junk.txt), returns an absolute path to the
         actual file or path.
         '''
+        #remove leading / if it exists, note that this isn't very portable.
+        actual_file = actual_file.strip("/")
         return os.path.join(self.actual_path, actual_file)
 
     def getattr(self, path):  
@@ -78,7 +82,7 @@ class MyFS(fuse.Fuse):
 
         if access_flags == os.O_RDONLY:
             hash_path = self.hash_dict[path]
-            fi=open(sys.argv[-2]+hash_path,"r")
+            fi=open(self.actual_file_path(hash_path),"r")
             open_files[path]=fi
             return 0
 
