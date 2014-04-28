@@ -188,13 +188,20 @@ class MyFS(fuse.Fuse):
         print "***UNLINK: ",path
 
         if path in open_files:
-            return -errno.ENOSYS
+            return -errno.ENOSYS 
 
-        os.unlink(sys.argv[-2]+path)
+        hash_file = self.hash_dict[path]
+        del self.hash_dict[path]
+		
+        if hash_file not in self.hash_dict.values() 
+            os.unlink(self.actual_file_path(self.hash_dict[path])
+        
         return 0
 
     def rename(self, oldpath, newpath):
-        os.rename(sys.argv[-2]+oldpath,sys.argv[-2]+newpath)
+	    hash_file = self.hash_dict[oldpath]
+	    self.hash_dict[newpath] = hash_file
+	    del open_files[oldpath]
         return 0
 
 
