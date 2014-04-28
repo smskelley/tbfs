@@ -70,7 +70,6 @@ class MyFS(fuse.Fuse):
 
         yield fuse.Direntry('.')
         yield fuse.Direntry('..')
-        print ":::::"+sys.argv[-2]
         for key in self.hash_dict:
             yield fuse.Direntry(os.path.basename(key))
 
@@ -116,6 +115,14 @@ class MyFS(fuse.Fuse):
         self.hash_dict[path] = hash_path
         open_files[path]=fi
         return 0
+
+    def mkdir(self, path, mode):
+        print "*****MKDIR: ",path
+        if path not in self.hash_dict:
+            self.hash_dict[path] = path
+            return os.mkdir(self.actual_file_path(path), mode)
+
+        return -errno.EEXIST    # if the path is already in path
 
     def chmod(self, path, mode):
         print "*****CHMOD: ",path
