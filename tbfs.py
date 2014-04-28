@@ -124,6 +124,10 @@ class MyFS(fuse.Fuse):
 
         return -errno.EEXIST    # if the path is already in path
 
+    def rmdir(self, path):
+        full_path = self._full_path(path)
+        return os.rmdir(full_path)
+
     def chmod(self, path, mode):
         print "*****CHMOD: ",path
         if path in self.hash_dict:
