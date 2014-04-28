@@ -221,12 +221,14 @@ class MyFS(fuse.Fuse):
         if hash_file not in self.hash_dict.values():
             os.unlink(self.actual_file_path(hash_file))
         
+        self.save_data()
         return 0
 
     def rename(self, oldpath, newpath):
         hash_file = self.hash_dict[oldpath]
         self.hash_dict[newpath] = hash_file
         del self.hash_dict[oldpath]
+        self.save_data()
         return 0
 
 
