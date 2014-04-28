@@ -58,6 +58,8 @@ class MyFS(fuse.Fuse):
 
     def getattr(self, path):  
         print "getattr-path: ",path
+        print "\tIn hash_dict: ", self.hash_dict.get(path,"Not found")
+        print "\tActual: ", self.actual_file_path(self.hash_dict.get(path,path))
         return os.stat(self.actual_file_path(self.hash_dict.get(path,path)))
 
     def readdir(self,path,offset):
