@@ -131,6 +131,10 @@ class MyFS(fuse.Fuse):
 
     def rmdir(self, path):
         print "*****RMDIR: ",path
+        for key in self.hash_dict:
+            if path == os.path.dirname(key):
+                return -errno.EPERM
+
         if path in self.hash_dict:
             del self.hash_dict[path]
             return os.rmdir(self.actual_file_path(path))
