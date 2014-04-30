@@ -245,9 +245,13 @@ class MyFS(fuse.Fuse):
         print "***rename: ", oldpath, newpath
 
         if oldpath == self.hash_dict[oldpath]: #If the oldpath is a directory
+            # This lambda will return the new path if the passed in key is
+            # in the old path or a subdirectory, otherwise it will return the key
             calc_path = lambda key : newpath + key[len(oldpath):] if (
-                    os.path.commonprefix([oldpath,key]) == oldpath
-                    ) else key
+                            os.path.commonprefix([oldpath,key]) == oldpath
+                        ) else key
+            # The following is a dictionary comprehension using the calc_path
+            # lambda. It will update the path if it needs to be.
             self.hash_dict = { calc_path(k): calc_path(v)
                                for k, v in self.hash_dict.items() }
 
