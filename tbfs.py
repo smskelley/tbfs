@@ -248,7 +248,8 @@ class MyFS(fuse.Fuse):
             calc_path = lambda key : newpath + key[len(oldpath):] if (
                     os.path.commonprefix([oldpath,key]) == oldpath
                     ) else key
-            self.hash_dict = { calc_path(k): calc_path(v) for k, v in self.hash_dict.items() }
+            self.hash_dict = { calc_path(k): calc_path(v)
+                               for k, v in self.hash_dict.items() }
 
             os.rename(self.actual_file_path(oldpath),
                       self.actual_file_path(newpath))
