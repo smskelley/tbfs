@@ -245,18 +245,13 @@ class MyFS(fuse.Fuse):
         print "***rename: ", oldpath, newpath
 
         if oldpath == self.hash_dict[oldpath]: #If the oldpath is a directory
-            hash_dict2 = {} #It won't let me add to hash_dict while looping through it so I made this to add
-                            #to then merge with hash_dict. I don't know if there's a better way to do this
-            self.hash_dict[newpath] = newpath
-            os.mkdir(self.actual_file_path(newpath))
+            calc_path = lambda key : newpath + key[len(oldpath):] if (
+                    os.path.commonprefix([oldpath,key]) == oldpath
+                    ) else key
+            self.hash_dict = { calc_path(k): calc_path(v) for k, v in self.hash_dict.items() }
 
-            for key in self.hash_dict:
-                if os.path.dirname(key) == oldpath and key:
-                    hash_dict2[newpath + "/" + os.path.basename(key)] = self.hash_dict[key]
-
-            self.hash_dict = dict(self.hash_dict.items() + hash_dict2.items())
-
-            del self.hash_dict[oldpath]
+            os.rename(self.actual_file_path(oldpath),
+                      self.actual_file_path(newpath))
             
         else: #The oldpath is a file
             hash_file = self.hash_dict[oldpath]
